@@ -2,24 +2,25 @@ import numpy as np
 import cv2
 from matplotlib import pyplot as plt
 
-'''For some reason the video is 640 by 352'''
 
-
-def printLocation(event,x,y,flags,param):
-    if event == cv2.EVENT_LBUTTONDBLCLK:
-        print("{}, {}".format(x,y))
+# def printLocation(event,x,y,flags,param):
+#     if event == cv2.EVENT_LBUTTONDBLCLK:
+#         print("{}, {}".format(x,y))
 
 
 # #Capture from video feed:
 # cap = cv2.VideoCapture(0)
 
-cap = cv2.VideoCapture('Video-opnames Smart Parking/1553866626095.mp4')
+cap = cv2.VideoCapture('Video-opnames Smart Parking/1553861675359.mp4')
 
 fps = cap.get(cv2.CAP_PROP_FPS)
 
-#Every 10 seconds
-interval = int(fps * 600)
+#Every x seconds
+interval = int(fps * 60)
 
+IMGSIZE = (60,60)
+
+#TODO Add additional parking locations
 #Car locations y1,y2,x1,x2
 cL = [[230, 295, 210, 270],
       [230, 295, 165, 225]]
@@ -50,7 +51,7 @@ while(cap.isOpened()):
 
         # Only do this every interval
         if f == 0:
-            print("10 seconds of video footage has gone by")
+            print("{} seconds of video footage has gone by".format(int(interval/fps)))
             for c in cL:
                 car = frame[c[0]:c[1], c[2]:c[3]]
                 plt.imshow(car)
@@ -59,13 +60,10 @@ while(cap.isOpened()):
         ## This could be an easier way for Shannon to go to grayscale?
         # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-        # car = frame[240:290, 220:270]
-        # a = np.array(car)
-        # frame[140:190, 120:170] = car
-
         f = (f + 1) % interval
 
-        cv2.setMouseCallback("frame", printLocation)
+        # cv2.setMouseCallback("frame", printLocation)
+
         ### Display the resulting frame
         cv2.imshow('frame',frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
