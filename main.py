@@ -1,8 +1,16 @@
-import numpy as np
-import cv2
 from matplotlib import pyplot as plt
 import cv2
 import tensorflow as tf
+import os
+
+# Make necissary direcotries
+videoDir = "Video-opnames Smart Parking"
+if not os.path.isdir(videoDir):
+    os.mkdir(videoDir)
+
+imageOutDir = "output images"
+if not os.path.isdir(imageOutDir):
+    os.mkdir(imageOutDir)
 
 CATEGORIES = ["free", "busy"]
 model = tf.keras.models.load_model('64x3-parking-CNN.model')
@@ -29,7 +37,7 @@ cap = cv2.VideoCapture('Video-opnames Smart Parking/1553861675359.mp4') # alles 
 fps = cap.get(cv2.CAP_PROP_FPS)
 
 #Every x seconds
-interval = int(fps * 10) # Hiermee verander je de interval van hoe lang het duurt om footage te proberen
+interval = int(fps * 60) # Hiermee verander je de interval van hoe lang het duurt om footage te proberen
 
 #TODO Add additional parking locations
 #Car locations y1,y2,x1,x2
@@ -53,6 +61,7 @@ pSpace = []
 for car in cL:
     pSpace.append("")
 
+intervalCount = 0
 framecount = 0
 first = True
 
@@ -74,7 +83,7 @@ while(cap.isOpened()):
         ### Our operations on the frame come here
 
         # Only do this every interval
-        if framecount == 0:
+        if (framecount % interval) == 0:
             print("{} seconds of video footage has gone by".format(int(interval/fps)))
             #Voor alle aangegeven auto locaties
             for c in range(len(cL)):
@@ -86,10 +95,15 @@ while(cap.isOpened()):
                 pSpace[c] = CATEGORIES[int(prediction[0][0])]
                 # print(pSpace)
 
+                # Save images to a file as jpg, you can change to png by changing the string to ".png"
+                cv2.imwrite(os.path.join(imageOutDir,"location-{} interval-{}.jpg".format(c, intervalCount)), car)
+
                 """WARNING: ONLY FOR TESTING"""
-                # Show the image
+                # #Show the image
                 # plt.imshow(car)
                 # plt.show()
+
+            intervalCount += 1
 
         # Hier tekenen we nog wat shit op het scherm voor iedere parkeerplaats
         for c in range(len(cL)):
@@ -101,7 +115,7 @@ while(cap.isOpened()):
             if pSpace[c] == "free":
                 cv2.circle(frame, ( (cL[c][2] + cL[c][3])//2, (cL[c][0] + cL[c][1])//2 ), 13, (0, 0, 255), -1)
 
-        framecount = (framecount + 1) % interval
+        framecount = framecount + 1
 
         # cv2.setMouseCallback("frame", printLocation)
 

@@ -1,5 +1,11 @@
 # Created by https://www.gitignore.io/api/python,osx
 
+### Personal files ###
+.idea/
+Video-opnames Smart Parking/
+output images/
+
+
 ### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -8,10 +14,6 @@ __pycache__/
 
 # C extensions
 *.so
-
-# Personal files
-Video-opnames Smart Parking/
-.idea/
 
 # Distribution / packaging
 .Python
