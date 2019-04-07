@@ -30,8 +30,8 @@ def printLocation(event,x,y,flags,param):
 # #Capture from video feed:
 # cap = cv2.VideoCapture(0)
 
-cap = cv2.VideoCapture('Video-opnames Smart Parking/1553861675359.mp4') # alles vol
-# cap = cv2.VideoCapture('Video-opnames Smart Parking/1553880837766.mp4') # Bijna leeg, 1 man vertrekt
+# cap = cv2.VideoCapture('Video-opnames Smart Parking/1553861675359.mp4') # alles vol
+cap = cv2.VideoCapture('Video-opnames Smart Parking/1553880837766.mp4') # Bijna leeg, 1 man vertrekt
 # cap = cv2.VideoCapture('Video-opnames Smart Parking/1553877508109.mp4') # Zichtbare problemen
 
 fps = cap.get(cv2.CAP_PROP_FPS)
@@ -109,11 +109,11 @@ while(cap.isOpened()):
         for c in range(len(cL)):
 
             # Teken vierkant op de plaats waar wordt gekeken
-            cv2.rectangle(frame, (cL[c][2], cL[c][0]), (cL[c][3], cL[c][1]), (0, 255, 0), 3)
+            cv2.rectangle(frame, (cL[c][2], cL[c][0]), (cL[c][3], cL[c][1]), (0, 255, 0), 1)
 
             # Teken rondje op vrije plaatsen
             if pSpace[c] == "free":
-                cv2.circle(frame, ( (cL[c][2] + cL[c][3])//2, (cL[c][0] + cL[c][1])//2 ), 13, (0, 0, 255), -1)
+                cv2.circle(frame, ( (cL[c][2] + cL[c][3])//2, (cL[c][0] + cL[c][1])//2 ), 7, (0, 0, 255), -1)
 
         framecount = framecount + 1
 
