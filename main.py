@@ -37,11 +37,11 @@ cap = cv2.VideoCapture('Video-opnames Smart Parking/1553880837766.mp4') # Bijna 
 fps = cap.get(cv2.CAP_PROP_FPS)
 
 #Every x seconds
-interval = int(fps * 60) # Hiermee verander je de interval van hoe lang het duurt om footage te proberen
+interval = int(fps * 6) # Hiermee verander je de interval van hoe lang het duurt om footage te proberen
 
 #TODO Add additional parking locations
 #Car locations y1,y2,x1,x2
-cL = [[220, 280, 0, 10], # Dit is niet echt onze fout tbh xD
+cL = [[220, 280, 0, 10],
       [220, 280, 10, 50],
       [225, 285, 40, 80],
       [225, 290, 70, 110],
