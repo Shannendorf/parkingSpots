@@ -3,17 +3,9 @@ import cv2
 import tensorflow as tf
 import os
 
-# Make necissary direcotries
-videoDir = "Video-opnames Smart Parking"
-if not os.path.isdir(videoDir):
-    os.mkdir(videoDir)
 
-imageOutDir = "output images"
-if not os.path.isdir(imageOutDir):
-    os.mkdir(imageOutDir)
+SAVE_IMAGES = True # Set to True if you want to save the images that the program cuts out
 
-CATEGORIES = ["free", "busy"]
-model = tf.keras.models.load_model('64x3-parking-CNN.model')
 
 def prepare(img_array):
     IMG_SIZE = 50
@@ -27,43 +19,55 @@ def printLocation(event,x,y,flags,param):
         print("{}, {}".format(x,y))
 
 
+# Make necissary direcotries
+videoDir = "Video-opnames Smart Parking"
+if not os.path.isdir(videoDir):
+    os.mkdir(videoDir)
+
+imageOutDirFull = "output images (Full)"
+if not os.path.isdir(imageOutDirFull):
+    os.mkdir(imageOutDirFull)
+
+imageOutDirEmpty = "output images (Empty)"
+if not os.path.isdir(imageOutDirEmpty):
+    os.mkdir(imageOutDirEmpty)
+
+# Car locations y1,y2,x1,x2
+cL = []
+
+with open("coords.txt", "r") as f:
+    coords = f.readlines()
+    for coord in coords:
+        cL.append(list(map(int, coord.strip().split(','))))
+
+
+CATEGORIES = ["free", "busy"]
+model = tf.keras.models.load_model('64x3-10epoch-new-CNN.model')
+
+
 # #Capture from video feed:
 # cap = cv2.VideoCapture(0)
 
 # cap = cv2.VideoCapture('Video-opnames Smart Parking/1553861675359.mp4') # alles vol
-cap = cv2.VideoCapture('Video-opnames Smart Parking/1553880837766.mp4') # Bijna leeg, 1 man vertrekt
-# cap = cv2.VideoCapture('Video-opnames Smart Parking/1553877508109.mp4') # Zichtbare problemen
+# cap = cv2.VideoCapture('Video-opnames Smart Parking/1553880837766.mp4') # Bijna leeg, 1 man vertrekt
+cap = cv2.VideoCapture('Video-opnames Smart Parking/1553877508109.mp4') # Zichtbare problemen
 
-fps = cap.get(cv2.CAP_PROP_FPS)
 
-#Every x seconds
-interval = int(fps * 6) # Hiermee verander je de interval van hoe lang het duurt om footage te proberen
+fps = cap.get(cv2.CAP_PROP_FPS) # Get fps of camera/video
+secondsPerInterval = 6
+interval = int(fps * secondsPerInterval) # Hiermee verander je de interval van hoe lang het duurt om footage te proberen
 
-#TODO Add additional parking locations
-#Car locations y1,y2,x1,x2
-cL = [[220, 280, 0, 10],
-      [220, 280, 10, 50],
-      [225, 285, 40, 80],
-      [225, 290, 70, 110],
-      [225, 295, 130, 170],
-      [225, 295, 170, 215],
-      [230, 295, 220, 265],
-      [230, 295, 260, 315],
-      [230, 295, 350, 400],
-      [230, 295, 405, 440],
-      [230, 295, 450, 490],
-      [225, 290, 490, 530],
-      [220, 275, 560, 580],
-      [215, 270, 590, 605]]
 
 # Array om mee bij te houden welke plaatsen bezet zijn
 pSpace = []
 for car in cL:
     pSpace.append("")
 
+
 intervalCount = 0
 framecount = 0
 first = True
+
 
 while(cap.isOpened()):
     ### Capture frame-by-frame
@@ -93,15 +97,13 @@ while(cap.isOpened()):
                 # Check if it has a car in it
                 prediction = model.predict(prepare(car))
                 pSpace[c] = CATEGORIES[int(prediction[0][0])]
-                # print(pSpace)
 
-                # Save images to a file as jpg, you can change to png by changing the string to ".png"
-                cv2.imwrite(os.path.join(imageOutDir,"location-{} interval-{}.jpg".format(c, intervalCount)), car)
-
-                """WARNING: ONLY FOR TESTING"""
-                # #Show the image
-                # plt.imshow(car)
-                # plt.show()
+                if SAVE_IMAGES == True:
+                    # Save images to a file as jpg, you can change to png by changing the string to ".png"
+                    if CATEGORIES[int(prediction[0][0])] == "free":
+                        cv2.imwrite(os.path.join(imageOutDirEmpty,"location-{} interval-{}.jpg".format(c, intervalCount)), car)
+                    else:
+                        cv2.imwrite(os.path.join(imageOutDirFull, "location-{} interval-{}.jpg".format(c, intervalCount)), car)
 
             intervalCount += 1
 
@@ -117,10 +119,13 @@ while(cap.isOpened()):
 
         framecount = framecount + 1
 
+        # If watching video, uncomment this if you want to be able to click and see the location of your cursor
         # cv2.setMouseCallback("frame", printLocation)
 
         ### Display the resulting frame
         cv2.imshow('frame',frame)
+
+        ### stop when user hits 'q' key
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
     else:
