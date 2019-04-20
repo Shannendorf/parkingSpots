@@ -32,48 +32,50 @@ imageOutDirEmpty = "output images (Empty)"
 if not os.path.isdir(imageOutDirEmpty):
     os.mkdir(imageOutDirEmpty)
 
-# Car locations y1,y2,x1,x2
-cL = []
+# Park locations y1,y2,x1,x2
+pL = []
 
+# Open textfile with car locations, put them in pL
 with open("coords.txt", "r") as f:
     coords = f.readlines()
     for coord in coords:
-        cL.append(list(map(int, coord.strip().split(','))))
+        pL.append(list(map(int, coord.strip().split(','))))
 
-
+# The categories the neural network can output
 CATEGORIES = ["free", "busy"]
-model = tf.keras.models.load_model('64x3-10epoch-new-CNN.model')
+model = tf.keras.models.load_model('64x3-10epoch-new-CNN.model') # Load the neural network
 
 
-# #Capture from video feed:
+###Capture from camera feed:
 # cap = cv2.VideoCapture(0)
 
+### Capture from video
 # cap = cv2.VideoCapture('Video-opnames Smart Parking/1553861675359.mp4') # alles vol
 # cap = cv2.VideoCapture('Video-opnames Smart Parking/1553880837766.mp4') # Bijna leeg, 1 man vertrekt
 cap = cv2.VideoCapture('Video-opnames Smart Parking/1553877508109.mp4') # Zichtbare problemen
 
 
-fps = cap.get(cv2.CAP_PROP_FPS) # Get fps of camera/video
-secondsPerInterval = 6
-interval = int(fps * secondsPerInterval) # Hiermee verander je de interval van hoe lang het duurt om footage te proberen
+fps = cap.get(cv2.CAP_PROP_FPS)             # Get frames per second of camera/video
+secondsPerInterval = 6                      # number of seconds per interval
+interval = int(fps * secondsPerInterval)    # The number of frames per interval
 
 
-# Array om mee bij te houden welke plaatsen bezet zijn
+# parking Space: an array that keeps track of which parking spaces are free and which ones are busy
 pSpace = []
-for car in cL:
+for _ in pL:
     pSpace.append("")
 
 
+# Variables needed for the loop
 intervalCount = 0
 framecount = 0
 first = True
-
 
 while(cap.isOpened()):
     ### Capture frame-by-frame
     ret, frame = cap.read()
 
-    # Als het lezen van de frame is gelukt:
+    # if reading the frame succeeded
     if ret==True:
 
         # Only do this the first time
@@ -81,46 +83,51 @@ while(cap.isOpened()):
             height, width = frame.shape[:2]
             print("Height: {}  Width: {}".format(height, width))
             print("Fps: {}".format(int(fps)))
-            print("The interval is {} seconds".format(int(interval/fps)))
+            print("The interval is {} seconds".format(secondsPerInterval))
             first = False
 
         ### Our operations on the frame come here
 
         # Only do this every interval
         if (framecount % interval) == 0:
-            print("{} seconds of video footage has gone by".format(int(interval/fps)))
-            #Voor alle aangegeven auto locaties
-            for c in range(len(cL)):
+
+            print("Interval: {}  Time per interval: {}".format(intervalCount, secondsPerInterval))
+
+            # For every car Location
+            for c in range(len(pL)):
+
                 # Cut out a specific part of the image
-                car = frame[cL[c][0]:cL[c][1], cL[c][2]:cL[c][3]]
+                car = frame[pL[c][0]:pL[c][1], pL[c][2]:pL[c][3]]
 
                 # Check if it has a car in it
                 prediction = model.predict(prepare(car))
                 pSpace[c] = CATEGORIES[int(prediction[0][0])]
 
                 if SAVE_IMAGES == True:
-                    # Save images to a file as jpg, you can change to png by changing the string to ".png"
+                    # If image gets specified as free, save it in the free folder, otherwise save it in busy folder
                     if CATEGORIES[int(prediction[0][0])] == "free":
+                        # Save images to a file as jpg, you can change to png by changing the string to ".png"
                         cv2.imwrite(os.path.join(imageOutDirEmpty,"location-{} interval-{}.jpg".format(c, intervalCount)), car)
                     else:
                         cv2.imwrite(os.path.join(imageOutDirFull, "location-{} interval-{}.jpg".format(c, intervalCount)), car)
 
             intervalCount += 1
 
-        # Hier tekenen we nog wat shit op het scherm voor iedere parkeerplaats
-        for c in range(len(cL)):
+        # For every park Location, draw something on the screen
+        for c in range(len(pL)):
 
-            # Teken vierkant op de plaats waar wordt gekeken
-            cv2.rectangle(frame, (cL[c][2], cL[c][0]), (cL[c][3], cL[c][1]), (0, 255, 0), 1)
+            # Draw a square on the park location
+            cv2.rectangle(frame, (pL[c][2], pL[c][0]), (pL[c][3], pL[c][1]), (0, 255, 0), 1)
 
-            # Teken rondje op vrije plaatsen
+            # draw a circle on the free locations
             if pSpace[c] == "free":
-                cv2.circle(frame, ( (cL[c][2] + cL[c][3])//2, (cL[c][0] + cL[c][1])//2 ), 7, (0, 0, 255), -1)
+                cv2.circle(frame, ((pL[c][2] + pL[c][3]) // 2, (pL[c][0] + pL[c][1]) // 2), 7, (0, 0, 255), -1)
 
-        framecount = framecount + 1
 
         # If watching video, uncomment this if you want to be able to click and see the location of your cursor
         # cv2.setMouseCallback("frame", printLocation)
+
+        framecount = framecount + 1
 
         ### Display the resulting frame
         cv2.imshow('frame',frame)
