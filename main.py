@@ -13,7 +13,7 @@ def prepare(img_array):
     new_array = cv2.resize(img_array, (IMG_SIZE, IMG_SIZE))
     return new_array.reshape(-1, IMG_SIZE, IMG_SIZE, 1)
 
-# For testing purposes, print the location of the mouse when you leftclick on the video
+# For testing purposes, print the location of the mouse when you left-click on the video
 def printLocation(event,x,y,flags,param):
     if event == cv2.EVENT_LBUTTONDBLCLK:
         print("{}, {}".format(x,y))
@@ -50,9 +50,9 @@ model = tf.keras.models.load_model('64x3-10epoch-new-CNN.model') # Load the neur
 # cap = cv2.VideoCapture(0)
 
 ### Capture from video
-# cap = cv2.VideoCapture('Video-opnames Smart Parking/1553861675359.mp4') # alles vol
-# cap = cv2.VideoCapture('Video-opnames Smart Parking/1553880837766.mp4') # Bijna leeg, 1 man vertrekt
-cap = cv2.VideoCapture('Video-opnames Smart Parking/1553877508109.mp4') # Zichtbare problemen
+# cap = cv2.VideoCapture('Video-opnames Smart Parking/1553861675359.mp4') # Everything full
+# cap = cv2.VideoCapture('Video-opnames Smart Parking/1553880837766.mp4') # Almost empty, one man leaves
+cap = cv2.VideoCapture('Video-opnames Smart Parking/1553877508109.mp4') # Visible problems
 
 
 fps = cap.get(cv2.CAP_PROP_FPS)             # Get frames per second of camera/video
@@ -124,7 +124,7 @@ while(cap.isOpened()):
                 cv2.circle(frame, ((pL[c][2] + pL[c][3]) // 2, (pL[c][0] + pL[c][1]) // 2), 7, (0, 0, 255), -1)
 
 
-        # If watching video, uncomment this if you want to be able to click and see the location of your cursor
+        # If watching a video, uncomment this if you want to be able to click and see the location of your cursor
         # cv2.setMouseCallback("frame", printLocation)
 
         framecount = framecount + 1
@@ -138,6 +138,6 @@ while(cap.isOpened()):
     else:
         break
 
-# When everything done, release the capture
+# When everything is done, release the capture
 cap.release()
 cv2.destroyAllWindows()
