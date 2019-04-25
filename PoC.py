@@ -50,13 +50,13 @@ model = tf.keras.models.load_model('64x3-10epoch-new-CNN.model') # Load the neur
 # cap = cv2.VideoCapture(0)
 
 ### Capture from video
-# cap = cv2.VideoCapture('Video-opnames Smart Parking/1553861675359.mp4') # Everything full
+cap = cv2.VideoCapture('Video-opnames Smart Parking/1553861675359.mp4') # Everything full
 # cap = cv2.VideoCapture('Video-opnames Smart Parking/1553880837766.mp4') # Almost empty, one man leaves
-cap = cv2.VideoCapture('Video-opnames Smart Parking/1553877508109.mp4') # Visible problems
+# cap = cv2.VideoCapture('Video-opnames Smart Parking/1553877508109.mp4') # Visible problems
 
 
 fps = cap.get(cv2.CAP_PROP_FPS)             # Get frames per second of camera/video
-secondsPerInterval = 6                      # number of seconds per interval
+secondsPerInterval = 30                      # number of seconds per interval
 interval = int(fps * secondsPerInterval)    # The number of frames per interval
 
 
